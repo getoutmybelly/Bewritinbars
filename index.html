@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Sheet — Song Structure Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#fbfaf7;
+    --panel:#ffffff;
+    --panel-2:#f0ede5;
+    --brass:#8a5a22;
+    --brass-dim:#b98a4a;
+    --cream:#191510;
+    --cream-dim:#5c5548;
+    --vu-green:#3f7a3a;
+    --vu-red:#a8342a;
+    --line:#ddd6c6;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    background-image:
+      radial-gradient(ellipse at top left, #f3efe4 0%, transparent 60%),
+      radial-gradient(ellipse at bottom right, #f6f3ea 0%, transparent 60%);
+    color:var(--cream);
+    font-family:'IBM Plex Mono', monospace;
+    min-height:100vh;
+    padding:0 0 80px 0;
+  }
+  .display{font-family:'Big Shoulders Display', sans-serif; font-weight:800; letter-spacing:0.02em;}
+
+  header{
+    padding:28px 20px 20px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+  }
+  .reel-row{display:flex; align-items:center; gap:12px; margin-bottom:6px;}
+  .reel{
+    width:14px;height:14px;border-radius:50%;
+    border:2px solid var(--brass-dim);
+    position:relative;
+    flex:none;
+  }
+  .reel::after{
+    content:'';position:absolute;inset:4px;border-radius:50%;background:var(--brass-dim);
+  }
+  .eyebrow{
+    font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:var(--brass);
+  }
+  h1{
+    font-size:clamp(30px,8vw,44px);
+    margin:2px 0 4px;
+    color:var(--cream);
+    line-height:0.95;
+  }
+  .sub{
+    font-size:13px; color:var(--cream-dim); max-width:60ch; line-height:1.5;
+  }
+  .rec-light{
+    position:absolute; top:28px; right:20px;
+    display:flex; align-items:center; gap:6px;
+    font-size:10px; letter-spacing:0.15em; color:var(--cream-dim);
+  }
+  .rec-dot{
+    width:8px;height:8px;border-radius:50%; background:var(--brass-dim);
+    transition:background .3s, box-shadow .3s;
+  }
+  .rec-dot.live{
+    background:var(--vu-red);
+    box-shadow:0 0 8px var(--vu-red), 0 0 16px var(--vu-red);
+    animation:pulse 1.6s infinite;
+  }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.55;} }
+
+  main{max-width:760px; margin:0 auto; padding:0 20px;}
+
+  .song-meta{
+    display:flex; gap:10px; flex-wrap:wrap; margin:22px 0 30px;
+  }
+  .song-meta input{
+    background:var(--panel); border:1px solid var(--line); color:var(--cream);
+    font-family:'IBM Plex Mono', monospace; font-size:13px; padding:10px 12px;
+    border-radius:var(--radius); flex:1; min-width:140px;
+  }
+  .song-meta input:focus{outline:1px solid var(--brass); border-color:var(--brass);}
+  .song-meta input::placeholder{color:var(--cream-dim);}
+
+  .genre-label{
+    font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:var(--brass); margin-bottom:10px;
+  }
+  .genre-grid{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:30px;
+  }
+  @media(min-width:480px){ .genre-grid{grid-template-columns:repeat(3,1fr);} }
+  .genre-btn{
+    background:var(--panel); border:1px solid var(--line); color:var(--cream-dim);
+    font-family:'Big Shoulders Display', sans-serif; font-weight:600; font-size:16px;
+    padding:14px 8px; border-radius:var(--radius); cursor:pointer; text-align:center;
+    transition:all .15s; letter-spacing:0.02em;
+  }
+  .genre-btn:hover{border-color:var(--brass-dim); color:var(--cream);}
+  .genre-btn.active{
+    background:linear-gradient(180deg, #f4ead9, #ede0c8);
+    border-color:var(--brass); color:var(--brass);
+    box-shadow:inset 0 0 0 1px var(--brass);
+  }
+  .genre-btn small{display:block; font-family:'IBM Plex Mono',monospace; font-weight:400; font-size:10px; color:var(--cream-dim); letter-spacing:0; margin-top:2px;}
+  .genre-btn.active small{color:var(--brass-dim);}
+
+  #structure{min-height:40px;}
+  .empty-state{
+    color:var(--cream-dim); font-size:13px; padding:30px 0; text-align:center; border:1px dashed var(--line); border-radius:var(--radius);
+  }
+
+  .strip-track{
+    display:flex; height:8px; border-radius:4px; overflow:hidden; margin:14px 0 0; border:1px solid var(--line);
+  }
+  .strip-seg{
+    background:var(--brass-dim); position:relative; border-right:1px solid var(--ink);
+  }
+  .strip-seg:last-child{border-right:none;}
+  .strip-seg.hl{background:var(--brass);}
+
+  .section-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    margin-bottom:14px; overflow:hidden;
+  }
+  .section-head{
+    display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+    padding:12px 14px 0;
+  }
+  .section-name{
+    font-family:'Big Shoulders Display', sans-serif; font-weight:800; font-size:19px; color:var(--cream);
+  }
+  .section-time{
+    font-size:11px; color:var(--brass); white-space:nowrap; letter-spacing:0.05em;
+  }
+  .section-tip{
+    font-size:12px; color:var(--cream-dim); padding:4px 14px 10px; line-height:1.4; border-bottom:1px solid var(--line);
+  }
+  .section-body{padding:12px 14px 14px; display:flex; flex-direction:column; gap:8px;}
+  textarea, .adlib-input{
+    width:100%; background:#faf8f3; border:1px solid var(--line); color:var(--cream);
+    font-family:'IBM Plex Mono', monospace; font-size:13px; line-height:1.5;
+    padding:10px; border-radius:var(--radius); resize:vertical;
+  }
+  textarea{min-height:64px;}
+  textarea:focus, .adlib-input:focus{outline:none; border-color:var(--brass);}
+  .adlib-row{display:flex; align-items:center; gap:8px;}
+  .adlib-row label{font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--cream-dim); white-space:nowrap;}
+  .adlib-input{font-style:italic;}
+
+  .total-bar{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:12px; color:var(--cream-dim); margin:6px 0 18px; letter-spacing:0.05em;
+  }
+  .total-bar strong{color:var(--brass);}
+
+  .action-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:40px;}
+  button.primary{
+    background:var(--brass); color:var(--ink); border:none; font-family:'Big Shoulders Display',sans-serif;
+    font-weight:800; font-size:15px; letter-spacing:0.03em; padding:13px 22px; border-radius:var(--radius);
+    cursor:pointer; flex:1; min-width:160px;
+  }
+  button.primary:hover{background:#734a1c;}
+  button.ghost{
+    background:transparent; color:var(--cream-dim); border:1px solid var(--line);
+    font-family:'IBM Plex Mono',monospace; font-size:12px; padding:13px 16px; border-radius:var(--radius); cursor:pointer;
+  }
+  button.ghost:hover{border-color:var(--brass-dim); color:var(--cream);}
+
+  #exportArea{display:none; margin-bottom:40px;}
+  #exportArea.show{display:block;}
+  #exportBox{
+    background:#fffdf9; border:1px solid var(--brass-dim); border-radius:var(--radius);
+    padding:14px; font-size:12.5px; white-space:pre-wrap; line-height:1.6; color:var(--cream); max-height:340px; overflow-y:auto;
+  }
+  .copied-msg{font-size:11px; color:var(--vu-green); margin-top:8px; height:14px;}
+
+  footer{
+    text-align:center; font-size:10px; color:var(--cream-dim); padding:20px; letter-spacing:0.1em;
+    border-top:1px solid var(--line); margin-top:20px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="reel-row"><span class="reel"></span><span class="eyebrow">win et al. records — writer's room</span></div>
+  <h1 class="display">TRACK SHEET</h1>
+  <div class="sub">Pick a genre. It lays out the real structure — intro, verses, hooks, timing — so you drop lyrics and adlibs into the slots instead of guessing at form.</div>
+  <div class="rec-light"><span class="rec-dot" id="recDot"></span>REC</div>
+</header>
+
+<main>
+  <div class="song-meta">
+    <input type="text" id="songTitle" placeholder="Song title">
+    <input type="text" id="songNote" placeholder="One-line concept / who this is a parody of, etc.">
+  </div>
+
+  <div class="genre-label">01 — Pick a genre</div>
+  <div class="genre-grid" id="genreGrid"></div>
+
+  <div id="structureWrap" style="display:none;">
+    <div class="genre-label">02 — Fill the slots</div>
+    <div class="total-bar"><span id="genreMeta"></span><strong id="totalTime"></strong></div>
+    <div id="structure"></div>
+
+    <div class="action-row">
+      <button class="primary" id="exportBtn">Export for Suno</button>
+      <button class="ghost" id="downloadBtn">Download .txt</button>
+      <button class="ghost" id="resetBtn">Clear song</button>
+    </div>
+
+    <div id="exportArea">
+      <div class="genre-label">03 — Paste into Suno</div>
+      <div id="exportBox"></div>
+      <div class="copied-msg" id="copiedMsg"></div>
+      <div class="action-row" style="margin-top:10px;">
+        <button class="ghost" id="copyBtn">Copy to clipboard</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" id="emptyState">Pick a genre above to build the track sheet.</div>
+</main>
+
+<footer>WIN ET AL. RECORDS — SIDE A</footer>
+
+<script>
+const GENRES = {
+  "Anthem / Arena": {
+    length: "3:30–4:00",
+    note: "Big political-satire / anthem energy — built for a crowd to shout back.",
+    sections: [
+      {name:"Intro", time:"0:00–0:15", tip:"One instrument, one idea. Let the hook melody tease before words start."},
+      {name:"Verse 1", time:"0:15–0:50", tip:"Set the scene / make the case. Plain, declarative lines — save the big words for the hook."},
+      {name:"Pre-Chorus", time:"0:50–1:05", tip:"Lift the energy — shorter lines, rising melody, sets up the drop into the hook."},
+      {name:"Chorus / Anthem Hook", time:"1:05–1:35", tip:"The line everyone sings back. Repeatable, singable, says the whole thesis in one breath."},
+      {name:"Verse 2", time:"1:35–2:05", tip:"New evidence, same argument. Can escalate or turn (the twist verse)."},
+      {name:"Chorus", time:"2:05–2:35", tip:"Same hook — maybe one word changes to reflect verse 2's turn."},
+      {name:"Breakdown / Bridge", time:"2:35–3:00", tip:"Strip it back — just vocal + one instrument, or a spoken-word aside. Contrast before the final push."},
+      {name:"Final Chorus (big)", time:"3:00–3:30", tip:"Full arrangement, maybe a key lift, group-vocal or gang-vocal feel."},
+      {name:"Outro / Tag", time:"3:30–3:45", tip:"Repeat the hook line down to nothing, or end cold on the last word."}
+    ]
+  },
+  "Pop": {
+    length: "3:00",
+    note: "Verse-chorus with a pre-chorus lift and a short bridge.",
+    sections: [
+      {name:"Intro", time:"0:00–0:15", tip:"A sample, a vocal riff, or a hook fragment — something to make the first 5 seconds count."},
+      {name:"Verse 1", time:"0:15–0:45", tip:"Tell the story plainly, save the hook words for the chorus."},
+      {name:"Pre-Chorus", time:"0:45–1:00", tip:"Build tension — shorter phrases, climbing melody."},
+      {name:"Chorus", time:"1:00–1:30", tip:"The hook. Say the title here at least once."},
+      {name:"Verse 2", time:"1:30–2:00", tip:"Same structure as verse 1, new details."},
+      {name:"Chorus", time:"2:00–2:30", tip:"Repeat, can add a harmony or adlib layer."},
+      {name:"Bridge", time:"2:30–2:50", tip:"New melody, new angle on the idea — the turn before the last chorus."},
+      {name:"Final Chorus + Outro", time:"2:50–3:00", tip:"Ride the hook out, maybe a key change or vocal ad-lib tag."}
+    ]
+  },
+  "Hip-Hop / Rap": {
+    length: "3:15–4:00",
+    note: "16-bar verses, punchy hook — built around cadence and repetition.",
+    sections: [
+      {name:"Intro / Beat Drop", time:"0:00–0:12", tip:"Producer tag, a vocal drop, or a cold beat switch into the first bar."},
+      {name:"Verse 1 (16 bars)", time:"0:12–0:55", tip:"Set your pocket. First 4 bars establish the flow, back half turns the screw."},
+      {name:"Hook / Chorus", time:"0:55–1:20", tip:"Short, repeatable, quotable — this is what gets shouted back."},
+      {name:"Verse 2 (16 bars)", time:"1:20–2:00", tip:"Escalate — new angle, harder punchlines, or a story turn."},
+      {name:"Hook / Chorus", time:"2:00–2:25", tip:"Repeat. Consider a small ad-lib variation."},
+      {name:"Verse 3 / Bridge (8–16 bars)", time:"2:25–3:00", tip:"Slow down, get personal, or bring in a feature-style pivot."},
+      {name:"Final Hook", time:"3:00–3:25", tip:"Ride it out, maybe with a vocal ad-lib chant underneath."},
+      {name:"Outro", time:"3:25–3:45", tip:"Tag line, shout-out, or fade on the last hook phrase."}
+    ]
+  },
+  "Rock / Classic Rock": {
+    length: "3:00–3:30",
+    note: "Riff-driven, built around a guitar solo in the back half.",
+    sections: [
+      {name:"Intro Riff", time:"0:00–0:20", tip:"The riff people will remember. Instrumental, sets the whole song's DNA."},
+      {name:"Verse 1", time:"0:20–0:50", tip:"Grounded, groove-driven vocal over the riff."},
+      {name:"Chorus", time:"0:50–1:15", tip:"Bigger, louder, more open chords — the release."},
+      {name:"Verse 2", time:"1:15–1:45", tip:"Same feel, new lyric content."},
+      {name:"Chorus", time:"1:45–2:10", tip:"Repeat, maybe add a harmony vocal."},
+      {name:"Guitar Solo", time:"2:10–2:40", tip:"Instrumental break — melody over the chorus changes. (Adlib box below can hold vocal ad-libs under the solo.)"},
+      {name:"Final Chorus", time:"2:40–3:05", tip:"Full band, biggest version of the hook."},
+      {name:"Outro", time:"3:05–3:25", tip:"Ride the riff out or cut it cold."}
+    ]
+  },
+  "Country": {
+    length: "3:00–3:30",
+    note: "Story-first verses, a chorus that names the truck/road/heartbreak.",
+    sections: [
+      {name:"Intro", time:"0:00–0:12", tip:"Acoustic guitar or pedal steel figure — sets the porch-light mood."},
+      {name:"Verse 1", time:"0:12–0:45", tip:"Ground it in a specific place and a specific person. Details over abstraction."},
+      {name:"Chorus", time:"0:45–1:15", tip:"The emotional thesis — say the title, make it singable at a bar."},
+      {name:"Verse 2", time:"1:15–1:45", tip:"Move the story forward — a new scene, same characters."},
+      {name:"Chorus", time:"1:45–2:15", tip:"Repeat, maybe add a harmony."},
+      {name:"Bridge", time:"2:15–2:40", tip:"The turn — the moment the story recontextualizes everything before it."},
+      {name:"Final Chorus + Tag", time:"2:40–3:15", tip:"Biggest version, often ends on a spoken or half-sung tag line."}
+    ]
+  },
+  "Folk": {
+    length: "4:30–6:00",
+    note: "More verses, slower build — the story has room to breathe.",
+    sections: [
+      {name:"Intro", time:"0:00–0:20", tip:"Fingerpicked guitar or banjo figure, unaccompanied."},
+      {name:"Verse 1", time:"0:20–1:00", tip:"Establish narrator and setting — folk rewards specificity and plain speech."},
+      {name:"Verse 2", time:"1:00–1:40", tip:"Continue the story — folk can run 3–5 verses before ever reaching a chorus."},
+      {name:"Chorus / Refrain", time:"1:40–2:10", tip:"A repeated line or refrain, often simpler than the verses around it."},
+      {name:"Verse 3", time:"2:10–2:50", tip:"The turn in the story — where the stakes shift."},
+      {name:"Bridge / Instrumental", time:"2:50–3:30", tip:"Harmonica, fiddle, or a wordless passage to let the story settle."},
+      {name:"Final Verse", time:"3:30–4:10", tip:"Resolution — where the narrator lands."},
+      {name:"Chorus / Refrain (out)", time:"4:10–4:45", tip:"Repeat the refrain, let it fade rather than end hard."}
+    ]
+  },
+  "R&B / Soul": {
+    length: "3:30–4:15",
+    note: "Groove-first, room for runs and ad-libs stacked under the vocal.",
+    sections: [
+      {name:"Intro", time:"0:00–0:15", tip:"A groove and a vocal riff/run to set the pocket before the verse starts."},
+      {name:"Verse 1", time:"0:15–0:50", tip:"Conversational, intimate delivery — this is where the details of the relationship live."},
+      {name:"Pre-Chorus", time:"0:50–1:10", tip:"Build with a rising melodic line and tighter phrasing."},
+      {name:"Chorus", time:"1:10–1:45", tip:"The emotional peak — leave room for a vocal run or two."},
+      {name:"Verse 2", time:"1:45–2:20", tip:"Deepen the story or introduce a complication."},
+      {name:"Chorus", time:"2:20–2:55", tip:"Repeat, layer in harmonies."},
+      {name:"Bridge / Ad-lib Breakdown", time:"2:55–3:30", tip:"Strip the band back — this is where ad-libs and runs carry the section."},
+      {name:"Final Chorus + Outro", time:"3:30–4:10", tip:"Full arrangement, vamp and fade on ad-libs."}
+    ]
+  },
+  "EDM / Dance": {
+    length: "3:15–4:00",
+    note: "Built around the drop — energy management matters more than lyrics.",
+    sections: [
+      {name:"Intro", time:"0:00–0:20", tip:"Establish the core loop, minimal elements."},
+      {name:"Build 1", time:"0:20–0:50", tip:"Add elements, rising tension — filter sweeps, risers, snare rolls."},
+      {name:"Drop 1", time:"0:50–1:30", tip:"Full energy, the hook (vocal or instrumental) lands here."},
+      {name:"Breakdown", time:"1:30–2:05", tip:"Strip back to vocals/pads — the emotional midpoint, quietest part of the track."},
+      {name:"Build 2", time:"2:05–2:30", tip:"Rebuild tension, often faster/shorter than build 1."},
+      {name:"Drop 2 (bigger)", time:"2:30–3:10", tip:"The biggest version of the hook — new layer or variation from drop 1."},
+      {name:"Outro", time:"3:10–3:45", tip:"Strip elements back out one at a time to a clean ending."}
+    ]
+  },
+  "Punk": {
+    length: "1:20–2:00",
+    note: "Fast, short, no time wasted — say it and get out.",
+    sections: [
+      {name:"Count-in", time:"0:00–0:04", tip:"\"1-2-3-4\" or a shout — punk announces itself."},
+      {name:"Verse 1", time:"0:04–0:20", tip:"Short, blunt lines. No room for a slow build."},
+      {name:"Chorus", time:"0:20–0:35", tip:"Shout-along hook, 4–8 words max."},
+      {name:"Verse 2", time:"0:35–0:50", tip:"Same energy, new gripe."},
+      {name:"Chorus", time:"0:50–1:05", tip:"Repeat, maybe faster."},
+      {name:"Bridge / Breakdown", time:"1:05–1:20", tip:"Half-time or a single sustained chord — the only breath in the whole song."},
+      {name:"Final Chorus + Out", time:"1:20–1:40", tip:"Slam the hook one more time and stop — no fade-outs in punk."}
+    ]
+  }
+};
+
+let currentGenre = null;
+let songData = {};
+
+const grid = document.getElementById('genreGrid');
+Object.keys(GENRES).forEach(name=>{
+  const btn = document.createElement('div');
+  btn.className='genre-btn';
+  btn.innerHTML = name + '<small>'+GENRES[name].length+'</small>';
+  btn.onclick = ()=>selectGenre(name, btn);
+  grid.appendChild(btn);
+});
+
+function selectGenre(name, btnEl){
+  currentGenre = name;
+  document.querySelectorAll('.genre-btn').forEach(b=>b.classList.remove('active'));
+  btnEl.classList.add('active');
+  document.getElementById('emptyState').style.display='none';
+  document.getElementById('structureWrap').style.display='block';
+  document.getElementById('exportArea').classList.remove('show');
+
+  const g = GENRES[name];
+  document.getElementById('genreMeta').textContent = name.toUpperCase()+' — '+g.note;
+  document.getElementById('totalTime').textContent = g.length;
+
+  songData = {};
+  g.sections.forEach((s,i)=>{ songData[i] = {lyrics:'', adlib:''}; });
+
+  const wrap = document.getElementById('structure');
+  wrap.innerHTML='';
+
+  // strip visual
+  const strip = document.createElement('div');
+  strip.className='strip-track';
+  g.sections.forEach((s,i)=>{
+    const seg = document.createElement('div');
+    seg.className='strip-seg'+(i%2===0?' hl':'');
+    seg.style.flex = '1 1 0';
+    strip.appendChild(seg);
+  });
+  wrap.appendChild(strip);
+
+  g.sections.forEach((s,i)=>{
+    const card = document.createElement('div');
+    card.className='section-card';
+    card.style.marginTop = i===0 ? '14px' : '0';
+    card.innerHTML = `
+      <div class="section-head">
+        <span class="section-name">${s.name}</span>
+        <span class="section-time">${s.time}</span>
+      </div>
+      <div class="section-tip">${s.tip}</div>
+      <div class="section-body">
+        <textarea placeholder="Lyrics for this section..." data-idx="${i}" class="lyricsBox"></textarea>
+        <div class="adlib-row">
+          <label>Ad-libs</label>
+          <input type="text" class="adlib-input" placeholder="e.g. (yeah), (uh), (c'mon)" data-idx="${i}">
+        </div>
+      </div>
+    `;
+    wrap.appendChild(card);
+  });
+
+  document.querySelectorAll('.lyricsBox').forEach(el=>{
+    el.addEventListener('input', e=>{
+      songData[e.target.dataset.idx].lyrics = e.target.value;
+      updateRecLight();
+    });
+  });
+  document.querySelectorAll('.adlib-input').forEach(el=>{
+    el.addEventListener('input', e=>{
+      songData[e.target.dataset.idx].adlib = e.target.value;
+      updateRecLight();
+    });
+  });
+  updateRecLight();
+}
+
+function updateRecLight(){
+  const hasContent = Object.values(songData).some(s=>s.lyrics.trim()||s.adlib.trim());
+  document.getElementById('recDot').classList.toggle('live', hasContent);
+}
+
+function buildExportText(){
+  if(!currentGenre) return '';
+  const g = GENRES[currentGenre];
+  const title = document.getElementById('songTitle').value.trim();
+  const noteLine = document.getElementById('songNote').value.trim();
+  let out = '';
+  if(title) out += title.toUpperCase()+'\n';
+  if(noteLine) out += '('+noteLine+')\n';
+  if(title||noteLine) out += '\n';
+
+  g.sections.forEach((s,i)=>{
+    const data = songData[i];
+    // Map descriptive names to clean Suno-style tags
+    let tag = s.name.split('(')[0].trim();
+    out += '['+tag+']\n';
+    if(data.adlib && data.adlib.trim()){
+      out += '('+data.adlib.trim()+')\n';
+    }
+    if(data.lyrics && data.lyrics.trim()){
+      out += data.lyrics.trim()+'\n';
+    } else {
+      out += '...\n';
+    }
+    out += '\n';
+  });
+  return out.trim();
+}
+
+document.getElementById('exportBtn').onclick = ()=>{
+  const text = buildExportText();
+  document.getElementById('exportBox').textContent = text;
+  document.getElementById('exportArea').classList.add('show');
+  document.getElementById('exportArea').scrollIntoView({behavior:'smooth', block:'start'});
+};
+
+document.getElementById('copyBtn').onclick = ()=>{
+  const text = document.getElementById('exportBox').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const msg = document.getElementById('copiedMsg');
+    msg.textContent = 'Copied to clipboard.';
+    setTimeout(()=>msg.textContent='', 2000);
+  });
+};
+
+document.getElementById('downloadBtn').onclick = ()=>{
+  const text = buildExportText();
+  if(!text){ return; }
+  const title = document.getElementById('songTitle').value.trim() || 'track-sheet';
+  const blob = new Blob([text], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = title.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+document.getElementById('resetBtn').onclick = ()=>{
+  if(currentGenre){
+    document.querySelectorAll('.lyricsBox').forEach(el=>el.value='');
+    document.querySelectorAll('.adlib-input').forEach(el=>el.value='');
+    document.getElementById('songTitle').value='';
+    document.getElementById('songNote').value='';
+    Object.keys(songData).forEach(i=>{ songData[i]={lyrics:'',adlib:''}; });
+    document.getElementById('exportArea').classList.remove('show');
+    updateRecLight();
+  }
+};
+</script>
+</body>
+</html>
