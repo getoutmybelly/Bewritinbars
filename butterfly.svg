@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 210" fill="none">
+<defs><linearGradient id="wing" x1="20" y1="20" x2="205" y2="180" gradientUnits="userSpaceOnUse"><stop stop-color="#f2a451"/><stop offset=".42" stop-color="#df7ba5"/><stop offset="1" stop-color="#7960b7"/></linearGradient></defs>
+<g stroke="#443156" stroke-width="3" stroke-linejoin="round">
+<path fill="url(#wing)" d="M118 100C88 30 26 1 14 30C1 64 33 111 88 122C32 115 33 171 67 184C94 192 113 150 120 117C128 157 150 195 178 180C214 158 202 112 151 120C211 97 244 47 219 23C192 0 139 48 122 100Z"/>
+<path d="M119 111L25 37M118 111L39 82M116 115L70 174M123 113L211 32M125 114L202 80M125 119L176 172" opacity=".65"/>
+<path d="M112 87Q120 69 127 88L125 136Q120 151 116 133Z" fill="#443156"/>
+<path d="M117 84Q95 53 99 48M123 83Q139 50 146 49" stroke-linecap="round"/>
+</g><g fill="#fff3d4"><circle cx="29" cy="39" r="5"/><circle cx="33" cy="58" r="4"/><circle cx="44" cy="77" r="3"/><circle cx="65" cy="158" r="4"/><circle cx="77" cy="171" r="3"/><circle cx="209" cy="34" r="5"/><circle cx="205" cy="54" r="4"/><circle cx="194" cy="74" r="3"/><circle cx="176" cy="157" r="4"/><circle cx="164" cy="170" r="3"/></g>
+</svg>
