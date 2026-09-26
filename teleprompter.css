@@ -1,0 +1,58 @@
+[hidden]{display:none!important}
+.mode-nav{display:flex;gap:10px;margin:22px 0}
+.mode-nav button[aria-pressed="true"]{background:var(--brass);color:var(--ink);border-color:var(--brass)}
+#prompterHeading{font-size:36px;margin:8px 0}
+#prompterSetup>label{display:block;font-size:12px;margin:24px 0 10px}
+#promptInput{min-height:260px}
+#promptMessage{font-size:13px;color:var(--brass)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,#promptViewport:focus-visible{outline:3px solid #b98a4a;outline-offset:3px}
+#prompter{padding:0;border:0;margin:0;width:100%;max-width:none;height:100%;height:100dvh;max-height:none;background:#131310;color:#fbfaf7;overflow:hidden}
+#prompter[open]{display:flex;flex-direction:column}
+#prompter::backdrop{background:#131310}
+.prompt-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid #3f3b32}
+.prompt-title{font-size:22px;letter-spacing:.08em;color:#d4b07a}
+#prompter button{font:inherit;font-size:13px;border:1px solid #736852;background:#25231e;color:#fbfaf7;border-radius:4px;padding:12px 16px;min-height:44px;cursor:pointer}
+#prompter button:hover{background:#3b352a}
+#prompter #playPrompt{background:#dfbc85;color:#191510;border-color:#dfbc85;min-width:110px;font-weight:600}
+.prompt-stage{position:relative;flex:1;min-height:0}
+#promptViewport{height:100%;overflow-y:auto;overscroll-behavior:contain;scroll-behavior:auto;scrollbar-width:thin;scrollbar-color:#736852 #131310}
+#promptText{font-family:Arial,sans-serif;font-size:48px;font-weight:600;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;max-width:1000px;margin:auto;padding:var(--prompt-lead,100px) 32px var(--prompt-tail,300px)}
+.reading-guide{pointer-events:none;position:absolute;top:30%;left:0;right:0;height:2px;background:#dfbc8533}
+.reading-guide::before{content:'▶';position:absolute;left:8px;top:-10px;font-size:18px;color:#dfbc85}
+.prompt-controls{padding:14px 20px max(14px,env(safe-area-inset-bottom));border-top:1px solid #3f3b32;background:#1b1a16}
+.transport{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#playStatus{font-size:12px;color:#d4b07a}
+.prompt-sliders{display:flex;gap:28px;margin-top:16px}
+.prompt-sliders label{flex:1;font-size:12px;display:block}
+.prompt-sliders output{float:right;color:#d4b07a}
+.prompt-sliders input{display:block;width:100%;margin:8px 0 0;accent-color:#dfbc85;min-height:24px}
+.prompt-help{font-size:11px;color:#b5ae9f;margin:12px 0 0;line-height:1.5}
+@media(max-width:480px){.prompt-toolbar{padding:10px 12px}.prompt-title{font-size:18px}.prompt-controls{padding:12px}.prompt-sliders{gap:16px}#prompter button{padding:10px 12px}.prompt-help{font-size:10px}}
+@media(max-height:500px){.prompt-help{display:none}.prompt-controls{padding:8px 14px}.prompt-sliders{margin-top:8px}.prompt-toolbar{padding:6px 14px}}
+/* A little album-cover energy for the writing room. */
+body{background-color:#fbf5ef;background-image:radial-gradient(ellipse at 0% 15%,#e2d2f280,transparent 48%),radial-gradient(ellipse at 100% 45%,#ffcda970,transparent 50%)}
+header{padding:36px max(20px,calc((100vw - 720px)/2));background:linear-gradient(110deg,#f7e9f3b8,#fff5e5a6);overflow:hidden}
+header h1{font-size:clamp(44px,9vw,72px);color:#443156}
+header .sub{position:relative;max-width:55ch}
+.artist-note{font-family:Georgia,serif;font-style:italic;font-size:clamp(20px,4vw,28px);color:#865471;margin:14px 0}
+.butterfly-garden{position:absolute;inset:0 0 auto;height:760px;overflow:hidden;pointer-events:none;z-index:1}
+.butterfly{position:absolute;filter:drop-shadow(0 10px 10px #63496920)}
+.butterfly-one{width:150px;right:5%;top:30px;transform:rotate(18deg)}
+.butterfly-two{width:85px;left:3%;top:400px;transform:rotate(-23deg);opacity:.7}
+.butterfly-three{width:95px;right:2%;top:630px;transform:rotate(30deg);opacity:.65}
+.mode-nav{position:relative;z-index:2}.mode-nav button{border-radius:24px}.section-card,#promptInput{border-radius:12px}.genre-btn{border-radius:10px}.genre-btn:hover{background:#f3e7f1}
+#prompterSetup{padding:24px;background:#ffffffa6;border:1px solid #e5d5de;border-radius:18px;box-shadow:0 15px 50px #71586c0a}
+#prompterHeading{color:#684574}#prompterSetup .action-row{margin-bottom:0}
+#countdownOverlay{position:absolute;inset:0;display:grid;place-items:center;background:#131310e8;color:#dfbc85;font:800 clamp(80px,20vh,180px) 'Big Shoulders Display',sans-serif;z-index:3;pointer-events:none}
+.take-options{display:flex;gap:16px;margin-top:12px}.take-options label{font-size:12px;display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.take-options select{color:#fbfaf7;background:#25231e;border:1px solid #736852;border-radius:4px;padding:8px;min-width:0;max-width:100%;flex:1;font:inherit;min-height:44px}
+.reading-settings{margin-top:10px;font-size:12px}.reading-settings summary{cursor:pointer;min-height:28px;padding:6px 0;color:#dfbc85}
+.lyric-section{color:#dfbc85}
+.prompt-controls{max-height:52%;overflow-y:auto;flex-shrink:0}
+#promptText{min-width:0;padding-left:28px;padding-right:28px}
+@media(max-width:600px){.butterfly-one{width:85px;right:8px;top:65px;opacity:.65}header .sub{max-width:85%}.butterfly-two{left:-26px;width:60px}.butterfly-three{right:-25px;width:70px}#prompterSetup{padding:18px}.take-options{gap:10px}.take-options label{flex-direction:column;align-items:stretch;gap:4px}.transport{gap:6px}#prompter button{font-size:12px}#promptText{padding-left:24px;padding-right:24px}}
+@media(max-height:500px){.prompt-controls{max-height:48%}.take-options{margin-top:8px}.prompt-toolbar{min-height:48px}}
+#prompterSetup .lyrics-filter,.lyrics-filter{display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.5;margin:16px 0 8px;cursor:pointer}
+.lyrics-filter input{width:18px;height:18px;flex:none;accent-color:#8a5a22}
+.filter-help{margin-top:0;font-size:12px}
+#prompter button:disabled{opacity:.5;cursor:default}

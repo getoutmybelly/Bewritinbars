@@ -187,17 +187,44 @@
     border-top:1px solid var(--line); margin-top:20px;
   }
 </style>
+<link rel="stylesheet" href="teleprompter.css">
 </head>
 <body>
 
+<div class="butterfly-garden" aria-hidden="true">
+  <img class="butterfly butterfly-one" src="butterfly.svg" alt="">
+  <img class="butterfly butterfly-two" src="butterfly.svg" alt="">
+  <img class="butterfly butterfly-three" src="butterfly.svg" alt="">
+</div>
 <header>
   <div class="reel-row"><span class="reel"></span><span class="eyebrow">win et al. records — writer's room</span></div>
   <h1 class="display">TRACK SHEET</h1>
+  <div class="artist-note">Let your words take flight.</div>
   <div class="sub">Pick a genre. It lays out the real structure — intro, verses, hooks, timing — so you drop lyrics and adlibs into the slots instead of guessing at form.</div>
   <div class="rec-light"><span class="rec-dot" id="recDot"></span>REC</div>
 </header>
 
 <main>
+  <nav class="mode-nav" aria-label="Workspace">
+    <button class="ghost" id="builderMode" aria-pressed="true">Song builder</button>
+    <button class="ghost" id="prompterMode" aria-pressed="false">Teleprompter</button>
+  </nav>
+  <section id="prompterSetup" hidden aria-labelledby="prompterHeading">
+    <div class="genre-label">READY FOR A TAKE</div>
+    <h2 class="display" id="prompterHeading">YOUR WORDS. YOUR PACE.</h2>
+    <p class="sub">Paste your finished lyrics, set your pace, and read along while you record.</p>
+    <label for="promptInput">Lyrics</label>
+    <textarea id="promptInput" rows="12" placeholder="Paste your lyrics here… Use headings like [Verse 1] and [Hook] to jump between sections."></textarea>
+    <label class="lyrics-filter"><input type="checkbox" id="lyricsOnly" checked> Lyrics only — hide production notes</label>
+    <p class="sub filter-help">Hides square-bracketed notes like [PIANO HOLDS]. Your original stays intact, and parentheses / ad-libs stay visible.</p>
+    <p class="sub" id="draftStatus">Your lyrics stay in this browser. This feature scrolls lyrics; use your usual app to record.</p>
+    <div class="action-row">
+      <button class="primary" id="openPrompter">Open teleprompter</button>
+      <button class="ghost" id="useSong">Use song builder lyrics</button>
+    </div>
+    <p id="promptMessage" role="status"></p>
+  </section>
+  <div id="builderWorkspace">
   <div class="song-meta">
     <input type="text" id="songTitle" placeholder="Song title">
     <input type="text" id="songNote" placeholder="One-line concept / who this is a parody of, etc.">
@@ -228,7 +255,46 @@
   </div>
 
   <div class="empty-state" id="emptyState">Pick a genre above to build the track sheet.</div>
+  </div>
 </main>
+
+<dialog id="prompter" aria-label="Lyrics teleprompter">
+  <div class="prompt-toolbar">
+    <span class="display prompt-title">TELEPROMPTER</span>
+    <button type="button" id="closePrompter">Edit lyrics / Exit</button>
+  </div>
+  <div class="prompt-stage">
+    <div id="countdownOverlay" hidden aria-live="polite"></div>
+    <div class="reading-guide" aria-hidden="true"></div>
+    <div id="promptViewport" tabindex="0" aria-label="Lyrics. Scroll to reposition."><div id="promptText"></div></div>
+  </div>
+  <div class="prompt-controls">
+    <div class="transport">
+      <button type="button" id="playPrompt">Start</button>
+      <button type="button" id="rewindPrompt">↶ Back 4 lines</button>
+      <button type="button" id="restartPrompt">Restart</button>
+      <button type="button" id="fullscreenPrompt">Full screen</button>
+      <span id="playStatus" role="status">Ready</span>
+    </div>
+    <div class="take-options">
+      <label for="promptCountdown">Count-in <select id="promptCountdown"><option value="0">Off</option><option value="3" selected>3 seconds</option><option value="5">5 seconds</option><option value="10">10 seconds</option></select></label>
+      <label for="promptSection">Jump to <select id="promptSection"><option value="">Beginning</option></select></label>
+    </div>
+    <div class="prompt-sliders">
+      <label for="promptSpeed">Speed <output id="speedValue">40 px/s</output><input id="promptSpeed" type="range" min="5" max="160" value="40" step="5"></label>
+      <label for="promptSize">Text size <output id="sizeValue">48 px</output><input id="promptSize" type="range" min="24" max="88" value="48" step="2"></label>
+    </div>
+    <details class="reading-settings">
+      <summary>Reading layout</summary>
+      <label class="lyrics-filter"><input type="checkbox" id="performanceLyricsOnly" checked> Lyrics only — hide production notes</label>
+      <div class="prompt-sliders">
+        <label for="promptSpacing">Line spacing <output id="spacingValue">1.6×</output><input id="promptSpacing" type="range" min="1.2" max="2.4" step="0.1" value="1.6"></label>
+        <label for="promptWidth">Reading width <output id="widthValue">100%</output><input id="promptWidth" type="range" min="50" max="100" step="5" value="100"></label>
+      </div>
+    </details>
+    <p class="prompt-help">Space: play / pause · ↑ / ↓: adjust speed · Esc: exit · Scroll or swipe to find your place</p>
+  </div>
+</dialog>
 
 <footer>WIN ET AL. RECORDS — SIDE A</footer>
 
@@ -511,5 +577,6 @@ document.getElementById('resetBtn').onclick = ()=>{
   }
 };
 </script>
+<script src="teleprompter.js"></script>
 </body>
 </html>
