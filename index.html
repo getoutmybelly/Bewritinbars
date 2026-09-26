@@ -187,6 +187,7 @@
     border-top:1px solid var(--line); margin-top:20px;
   }
 </style>
+<link rel="stylesheet" href="teleprompter.css">
 </head>
 <body>
 
@@ -198,6 +199,24 @@
 </header>
 
 <main>
+  <nav class="mode-nav" aria-label="Workspace">
+    <button class="ghost" id="builderMode" aria-pressed="true">Song builder</button>
+    <button class="ghost" id="prompterMode" aria-pressed="false">Teleprompter</button>
+  </nav>
+  <section id="prompterSetup" hidden aria-labelledby="prompterHeading">
+    <div class="genre-label">READY FOR A TAKE</div>
+    <h2 class="display" id="prompterHeading">YOUR WORDS. YOUR PACE.</h2>
+    <p class="sub">Paste your finished lyrics, set your pace, and read along while you record.</p>
+    <label for="promptInput">Lyrics</label>
+    <textarea id="promptInput" rows="12" placeholder="Paste your lyrics here… Keep blank lines between verses and hooks."></textarea>
+    <p class="sub" id="draftStatus">Your lyrics stay in this browser. This feature scrolls lyrics; use your usual app to record.</p>
+    <div class="action-row">
+      <button class="primary" id="openPrompter">Open teleprompter</button>
+      <button class="ghost" id="useSong">Use song builder lyrics</button>
+    </div>
+    <p id="promptMessage" role="status"></p>
+  </section>
+  <div id="builderWorkspace">
   <div class="song-meta">
     <input type="text" id="songTitle" placeholder="Song title">
     <input type="text" id="songNote" placeholder="One-line concept / who this is a parody of, etc.">
@@ -228,7 +247,32 @@
   </div>
 
   <div class="empty-state" id="emptyState">Pick a genre above to build the track sheet.</div>
+  </div>
 </main>
+
+<dialog id="prompter" aria-label="Lyrics teleprompter">
+  <div class="prompt-toolbar">
+    <span class="display prompt-title">TELEPROMPTER</span>
+    <button type="button" id="closePrompter">Edit lyrics / Exit</button>
+  </div>
+  <div class="prompt-stage">
+    <div class="reading-guide" aria-hidden="true"></div>
+    <div id="promptViewport" tabindex="0" aria-label="Lyrics. Scroll to reposition."><div id="promptText"></div></div>
+  </div>
+  <div class="prompt-controls">
+    <div class="transport">
+      <button type="button" id="playPrompt">Start</button>
+      <button type="button" id="restartPrompt">Restart</button>
+      <button type="button" id="fullscreenPrompt">Full screen</button>
+      <span id="playStatus" role="status">Ready</span>
+    </div>
+    <div class="prompt-sliders">
+      <label for="promptSpeed">Speed <output id="speedValue">40 px/s</output><input id="promptSpeed" type="range" min="5" max="160" value="40" step="5"></label>
+      <label for="promptSize">Text size <output id="sizeValue">48 px</output><input id="promptSize" type="range" min="24" max="88" value="48" step="2"></label>
+    </div>
+    <p class="prompt-help">Space: play / pause · ↑ / ↓: adjust speed · Esc: exit · Scroll or swipe to find your place</p>
+  </div>
+</dialog>
 
 <footer>WIN ET AL. RECORDS — SIDE A</footer>
 
@@ -511,5 +555,6 @@ document.getElementById('resetBtn').onclick = ()=>{
   }
 };
 </script>
+<script src="teleprompter.js"></script>
 </body>
 </html>
