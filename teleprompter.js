@@ -13,6 +13,8 @@
   let countdownTimer = 0;
   let counting = false;
   let needsCountIn = true;
+  const lyricsOnly = el('lyricsOnly');
+  const performanceLyricsOnly = el('performanceLyricsOnly');
   const storageKey = 'track-sheet-teleprompter-v1';
   let playing = false;
   let frame = 0;
@@ -22,7 +24,7 @@
 
   function save() {
     try {
-      localStorage.setItem(storageKey, JSON.stringify({lyrics: input.value, speed: speed.value, size: size.value, countdown: countdown.value, spacing: spacing.value, width: width.value}));
+      localStorage.setItem(storageKey, JSON.stringify({lyrics: input.value, speed: speed.value, size: size.value, countdown: countdown.value, spacing: spacing.value, width: width.value, lyricsOnly: lyricsOnly.checked}));
       el('draftStatus').textContent = 'Lyrics and settings saved in this browser. Use your usual app to record.';
     } catch {
       el('draftStatus').textContent = 'Browser storage is unavailable. Keep a copy of your lyrics before closing this page.';
@@ -31,6 +33,7 @@
   try {
     const draft = JSON.parse(localStorage.getItem(storageKey) || 'null');
     if (draft) {
+      if (typeof draft.lyricsOnly === 'boolean') lyricsOnly.checked = draft.lyricsOnly;
       if ([0, 3, 5, 10].includes(Number(draft.countdown))) countdown.value = draft.countdown;
       if (Number(draft.spacing) >= 1.2 && Number(draft.spacing) <= 2.4) spacing.value = draft.spacing;
       if (Number(draft.width) >= 50 && Number(draft.width) <= 100) width.value = draft.width;
@@ -125,22 +128,60 @@
     position = viewport.scrollTop;
   }
   new ResizeObserver(layout).observe(viewport);
+  function lyricLines() {
+    const source = input.value.replace(/\r\n?/g, '\n');
+    // Keep source line numbers stable, including notes spanning several lines.
+    const cleaned = source.replace(/\[[^\]]*\]/g, note => '\n'.repeat((note.match(/\n/g) || []).length));
+    const cleanLines = cleaned.split('\n');
+    let blank = true;
+    return source.split('\n').map((line, index) => {
+      const label = line.trim().replace(/^\[|\]$/g, '');
+      const section = label.match(/^((?:(?:final|last)\s+)?(?:pre[- ]chorus|post[- ]chorus|verse|hook|chorus|intro|outro|bridge|refrain|breakdown|drop|build)(?:\s+\d+)?)(?=\s*(?:$|[—–:/(+]| - ))/i);
+      const bareSection = !line.includes('[') && /^(?:(?:final|last)\s+)?(?:pre[- ]chorus|post[- ]chorus|verse|hook|chorus|intro|outro|bridge|refrain|breakdown|drop|build)(?:\s+\d+)?\s*:?$/i.test(line.trim());
+      const heading = section && (line.trim().startsWith('[') || bareSection) ? section[1] : null;
+      const visible = lyricsOnly.checked ? (bareSection ? '' : cleanLines[index]) : line;
+      const noteOnly = lyricsOnly.checked && !visible.trim() && (line.trim() || bareSection);
+      const show = !noteOnly && (!lyricsOnly.checked || visible.trim() || !blank);
+      if (show) blank = !visible.trim();
+      return {index, visible, heading, show};
+    });
+  }
   function renderLyrics() {
     text.replaceChildren();
     const menu = el('promptSection');
     menu.replaceChildren(new Option('Beginning', ''));
-    input.value.split('\n').forEach((line, index) => {
+    const pending = [];
+    lyricLines().forEach(({index, visible, heading, show}) => {
+      if (heading) pending.push({id: 'lyric-section-' + index, label: heading});
+      if (!show) return;
       const node = document.createElement('span');
-      node.textContent = line + '\n';
-      const label = line.trim();
-      if (/^\[[^\]]+\]$/.test(label) || /^(?:verse|hook|chorus|intro|outro|bridge|pre-chorus|refrain|breakdown)(?:\s+\d+)?\s*:?$/i.test(label)) {
-        node.id = 'lyric-section-' + index;
-        node.className = 'lyric-section';
-        menu.add(new Option(label.replace(/^\[|\]$/g, ''), node.id));
+      if (visible.trim() && pending.length) {
+        node.id = 'lyric-line-' + index;
+        pending.splice(0).forEach(section => menu.add(new Option(section.label, node.id)));
       }
+      node.dataset.sourceLine = index;
+      node.textContent = visible + '\n';
+      if (heading && !lyricsOnly.checked) node.className = 'lyric-section';
       text.appendChild(node);
     });
   }
+  performanceLyricsOnly.checked = lyricsOnly.checked;
+  function filterChanged(control) {
+    lyricsOnly.checked = performanceLyricsOnly.checked = control.checked;
+    save();
+    if (!dialog.open) return;
+    const guide = viewport.getBoundingClientRect().top + viewport.clientHeight * 0.3;
+    const current = [...text.querySelectorAll('[data-source-line]')].find(node => node.getBoundingClientRect().bottom > guide);
+    const sourceLine = Number(current?.dataset.sourceLine || 0);
+    pause('Reading view updated');
+    renderLyrics();
+    const target = [...text.querySelectorAll('[data-source-line]')].find(node => Number(node.dataset.sourceLine) >= sourceLine);
+    const top = target ? target.getBoundingClientRect().top - viewport.getBoundingClientRect().top + viewport.scrollTop - viewport.clientHeight * 0.3 : 0;
+    reposition(top, 'Reading view updated — ready');
+    el('playPrompt').disabled = !text.textContent.trim();
+    if (el('playPrompt').disabled) el('playStatus').textContent = 'No lyrics remain. Turn off Lyrics only to see your notes.';
+  }
+  [lyricsOnly, performanceLyricsOnly].forEach(control => control.addEventListener('change', () => filterChanged(control)));
   function reposition(top, status) {
     pause(status);
     viewport.scrollTop = Math.max(0, top);
@@ -157,6 +198,8 @@
   el('openPrompter').onclick = () => {
     if (!input.value.trim()) { el('promptMessage').textContent = 'Paste your lyrics above to start your take.'; input.focus(); return; }
     renderLyrics();
+    if (!text.textContent.trim()) { el('promptMessage').textContent = 'Only production notes were found. Add lyrics or turn off Lyrics only.'; return; }
+    el('playPrompt').disabled = false;
     needsCountIn = true;
     dialog.showModal();
     document.body.style.overflow = 'hidden';

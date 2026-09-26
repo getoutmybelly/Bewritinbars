@@ -215,6 +215,8 @@
     <p class="sub">Paste your finished lyrics, set your pace, and read along while you record.</p>
     <label for="promptInput">Lyrics</label>
     <textarea id="promptInput" rows="12" placeholder="Paste your lyrics here… Use headings like [Verse 1] and [Hook] to jump between sections."></textarea>
+    <label class="lyrics-filter"><input type="checkbox" id="lyricsOnly" checked> Lyrics only — hide production notes</label>
+    <p class="sub filter-help">Hides square-bracketed notes like [PIANO HOLDS]. Your original stays intact, and parentheses / ad-libs stay visible.</p>
     <p class="sub" id="draftStatus">Your lyrics stay in this browser. This feature scrolls lyrics; use your usual app to record.</p>
     <div class="action-row">
       <button class="primary" id="openPrompter">Open teleprompter</button>
@@ -284,6 +286,7 @@
     </div>
     <details class="reading-settings">
       <summary>Reading layout</summary>
+      <label class="lyrics-filter"><input type="checkbox" id="performanceLyricsOnly" checked> Lyrics only — hide production notes</label>
       <div class="prompt-sliders">
         <label for="promptSpacing">Line spacing <output id="spacingValue">1.6×</output><input id="promptSpacing" type="range" min="1.2" max="2.4" step="0.1" value="1.6"></label>
         <label for="promptWidth">Reading width <output id="widthValue">100%</output><input id="promptWidth" type="range" min="50" max="100" step="5" value="100"></label>

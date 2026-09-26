@@ -52,3 +52,7 @@ header .sub{position:relative;max-width:55ch}
 #promptText{min-width:0;padding-left:28px;padding-right:28px}
 @media(max-width:600px){.butterfly-one{width:85px;right:8px;top:65px;opacity:.65}header .sub{max-width:85%}.butterfly-two{left:-26px;width:60px}.butterfly-three{right:-25px;width:70px}#prompterSetup{padding:18px}.take-options{gap:10px}.take-options label{flex-direction:column;align-items:stretch;gap:4px}.transport{gap:6px}#prompter button{font-size:12px}#promptText{padding-left:24px;padding-right:24px}}
 @media(max-height:500px){.prompt-controls{max-height:48%}.take-options{margin-top:8px}.prompt-toolbar{min-height:48px}}
+#prompterSetup .lyrics-filter,.lyrics-filter{display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.5;margin:16px 0 8px;cursor:pointer}
+.lyrics-filter input{width:18px;height:18px;flex:none;accent-color:#8a5a22}
+.filter-help{margin-top:0;font-size:12px}
+#prompter button:disabled{opacity:.5;cursor:default}
